@@ -3,21 +3,34 @@ require "dbh.php";
 
 if (isset($_POST['edit-category-btn'])) {
 
-    $id = $_POST['category-id'];
-    $name = $_POST['edit-category-name'];
-    $metaTitle = $_POST['edit-category-meta-title'];
-    $categoryPath = $_POST['edit-category-path'];
-
-    $sqlEditCategory = "UPDATE blog_category SET v_category_title = '$name', v_category_meta_title = '$metaTitle', v_category_path = '$categoryPath' WHERE n_category_id = '$id'";
-
-    if (mysqli_query($conn, $sqlEditCategory)) {
-        mysqli_close($conn);
-        header("Location: ../blog-category.php?editcategory=success");
-        exit();
+    // make sure all input are full
+    if (
+        // some inputs msissing
+        empty($_POST['category-id'])
+        || empty($_POST['edit-category-name'])
+        || empty($_POST['edit-category-meta-title'])
+        || empty($_POST['edit-category-path'])
+    ) {
+        // Display an error message if any required fields are missing
+        echo "<script>alert('Error! Please fill in all required fields')</script>";
+        echo "<script>window.location.href = '../blog-category.php';</script>";
     } else {
-        mysqli_close($conn);
-        header("Location: ../blog-category.php?editcategory=error");
-        exit();
+        $id = $_POST['category-id'];
+        $name = $_POST['edit-category-name'];
+        $metaTitle = $_POST['edit-category-meta-title'];
+        $categoryPath = $_POST['edit-category-path'];
+
+        $sqlEditCategory = "UPDATE blog_category SET v_category_title = '$name', v_category_meta_title = '$metaTitle', v_category_path = '$categoryPath' WHERE n_category_id = '$id'";
+
+        if (mysqli_query($conn, $sqlEditCategory)) {
+            mysqli_close($conn);
+            header("Location: ../blog-category.php?editcategory=success");
+            exit();
+        } else {
+            mysqli_close($conn);
+            header("Location: ../blog-category.php?editcategory=error");
+            exit();
+        }
     }
 } else {
     header("Location: ../index.php");

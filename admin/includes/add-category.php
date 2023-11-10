@@ -19,14 +19,7 @@ if (isset($_POST['add-category-btn'])) {
         // create time create a blog category
         $date = date("Y-m-d");
         $time = date("H:i:sa");
-
-        // echo $name . "<br/>";
-        // echo $metaTitle . "<br/>";
-        // echo $categoryPath . "<br/>";
-        // echo $date . "<br/>";
-        // echo $time . "<br/>";
-
-
+        // ///// insert the date to the 'category_blog' table.
         $sqlAddCategory = "INSERT INTO blog_category (v_category_title,v_category_meta_title,v_category_path,d_date_created,d_time_created)
             VALUES ('$name','$metaTitle','$categoryPath','$date','$time')";
         if (mysqli_query($conn, $sqlAddCategory)) {
@@ -46,5 +39,5 @@ if (isset($_POST['add-category-btn'])) {
     }
 } else {
     // Redirect to the blog-category.php - btn has not preesed
-    echo "<script>window.location.href = '../blog-category.php';</script>";
+    echo "<script>window.location.href = '../index.php';</script>";
 }
