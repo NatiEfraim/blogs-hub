@@ -1,29 +1,10 @@
 <?php
 include './includes/dbh.php';
+////un-set-all-session
+include './includes/unset-sessions.php';
 $sqlBlogs = "SELECT * FROM blog_post WHERE f_post_status != '2'";
 $queryBlogs = mysqli_query($conn, $sqlBlogs);
 $numBlogs = mysqli_num_rows($queryBlogs);
-
-// require './includes/db-pdo.php';
-
-
-// try {
-//     // Query the database to select all blog-category from the "blog_category" table
-//     $sqlBlog = $conn->prepare("SELECT * FROM blog_post WHERE f_post_status !='2'");
-//     $sqlBlog->execute();
-
-//     // Fetch all category records as an associative array
-//     $allBlogs = $sqlBlog->fetchAll(PDO::FETCH_OBJ);
-
-//     if (count($allBlogs) === 0) {
-//         // Handle the case where no admin records were found
-//         echo "No categories records found.";
-//     }
-// } catch (PDOException $e) {
-//     // Handle database query errors
-//     die("Connection failed: " . $e->getMessage());
-// }
-
 
 
 ?>
@@ -64,6 +45,7 @@ $numBlogs = mysqli_num_rows($queryBlogs);
                 </div>
                 <!-- get msg from addblog url -->
                 <?php
+                // ////msg url from the addblog
                 if (isset($_REQUEST['addblog'])) {
                     if ($_REQUEST['addblog'] == "success") {
                         echo "<div class='alert alert-success'>
@@ -71,6 +53,15 @@ $numBlogs = mysqli_num_rows($queryBlogs);
                         </div>";
                     }
                 }
+                // //////msg url from updateblog.
+                if (isset($_REQUEST['updateblog'])) {
+                    if ($_REQUEST['updateblog'] == "success") {
+                        echo "<div class='alert alert-success'>
+                            <strong>Success!</strong> Blog changes has been saved successfully!
+                        </div>";
+                    }
+                }
+                // ////msg url from the deleteblog
                 if (isset($_REQUEST['deleteblogpost'])) {
                     if ($_REQUEST['deleteblogpost'] == "success") {
                         echo "<div class='alert alert-success'>

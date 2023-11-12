@@ -79,26 +79,63 @@ if (isset($_POST['submit-blog'])) {
     // ///// insert the date to the 'category_blog' table.
     $sqlAddBlog = "INSERT INTO blog_post (n_category_id,v_post_title,v_post_meta_title,v_post_path,v_post_summary,v_post_content,v_main_image_url,v_alt_image_url,n_home_page_placement,f_post_status,d_date_created,d_time_created)
     VALUES ('$blogCategoryId','$title','$metaTitle','$blogPath','$blogSummary','$blogContent','$mainImgUrl','$altImgUrl','$homePagePlacement','1','$date','$time')";
+    /////try and check run the sql query of add colum to the 'blog_post' table
     if (mysqli_query($conn, $sqlAddBlog)) {
-        // ////after adding a blog to database - unset session
-        // /////store the inputs in the session.
-        unset($_SESSION['blogTitle']);
-        unset($_SESSION['blogMetaTitle']);
-        unset($_SESSION['blogCategoryId']);
-        unset($_SESSION['blogSummary']);
-        unset($_SESSION['blogContent']);
-        unset($_SESSION['blogTags']);
-        unset($_SESSION['blogPath']);
-        unset($_SESSION['blogHomePagePlacement']);
-
-
-
-        mysqli_close($conn); //close database
-        echo "<script>window.location.href = '../blogs.php?addblog=success';</script>";
-        exit();
+        //////grab from data the id of the last colum in the blog_post table
+        $blogPostId = mysqli_insert_id($conn);
+        /////diffine sql query for the blog_tags table
+        $sqlAddTags = "INSERT INTO blog_tags (n_blog_post_id, v_tag) VALUES ('$blogPostId', '$blogTags')";
+        ////try run the query 
+        if (mysqli_query($conn, $sqlAddTags)) {
+            mysqli_close($conn); ////close database connection
+            /////cance the session 
+            unset($_SESSION['blogTitle']);
+            unset($_SESSION['blogMetaTitle']);
+            unset($_SESSION['blogCategoryId']);
+            unset($_SESSION['blogSummary']);
+            unset($_SESSION['blogContent']);
+            unset($_SESSION['blogTags']);
+            unset($_SESSION['blogPath']);
+            unset($_SESSION['blogHomePagePlacement']);
+            //////rediirect to the blogs.php with addblog msg
+            header("Location: ../blogs.php?addblog=success");
+            exit();
+        } else {
+            //////reddirect with error msg
+            formError("sqlerror");
+        }
     } else {
+        //////reddirect with error msg
         formError("sqlerror");
     }
+
+    // if (mysqli_query($conn, $sqlAddBlog)) {
+
+    //     /////get the last id from the 'blog_post' table
+    //     $blogPostId = mysqli_insert_id($conn);
+    //     /////try to insert to the 'blog_tags' table in database.
+    //     $sqlAddTags = "INSERT INTO blog_tags (n_blog_post_id, v_tag) VALUES ('$blogPostId', '$blogTags')";
+    //     // ////after adding a blog to database - unset session
+    //     // /////store the inputs in the session.
+    //     unset($_SESSION['blogTitle']);
+    //     unset($_SESSION['blogMetaTitle']);
+    //     unset($_SESSION['blogCategoryId']);
+    //     unset($_SESSION['blogSummary']);
+    //     unset($_SESSION['blogContent']);
+    //     unset($_SESSION['blogTags']);
+    //     unset($_SESSION['blogPath']);
+    //     unset($_SESSION['blogHomePagePlacement']);
+
+
+
+    //     mysqli_close($conn); //close database
+    //     echo "<script>window.location.href = '../blogs.php?addblog=success';</script>";
+    //     exit();
+    // } else {
+    //     formError("sqlerror");
+    // }
+
+
 } else {
     // Redirect to the index.php - btn has not preesed
     // echo "<script>window.location.href = '../index.php';</script>";

@@ -1,9 +1,8 @@
 <?php
-// include './includes/dbh.php';
-// $sqlCategories = "SELECT * FROM blog_category";
-// $queryCategories = mysqli_query($conn, $sqlCategories);///get the query
-// $numCategories=mysqli_num_rows($queryCategories);///get num of rows in the table
+
 require './includes/db-pdo.php';
+////un-set-all-session
+include './includes/unset-sessions.php';
 try {
     // Query the database to select all blog-category from the "blog_category" table
     $sqlCategories = $conn->prepare("SELECT * FROM blog_category");

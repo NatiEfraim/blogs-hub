@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿<?php
+////un-set-all-session.
+include './includes/unset-sessions.php';
+?>
+<!-- html part -->
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>

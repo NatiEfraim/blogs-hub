@@ -7,10 +7,10 @@ $password = ''; // Replace with your database password (if any)
 
 try {
     // Create a new PDO instance
-    $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdoConn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
 
     // Set the PDO error mode to exception (optional but recommended)
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdoConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Output a message if the connection is successful (optional)
     // echo "Connected successfully";

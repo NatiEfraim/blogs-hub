@@ -5,7 +5,7 @@ session_start();
 // try connect with pdo - and grab all data from 'blog_category' table
 try {
     // Query the database to select all blog-category from the "blog_category" table
-    $sqlCategories = $conn->prepare("SELECT * FROM blog_category");
+    $sqlCategories = $pdoConn->prepare("SELECT * FROM blog_category");
     $sqlCategories->execute();
 
     // Fetch all category records as an associative array
@@ -40,6 +40,8 @@ try {
     <link href="assets/css/custom-styles.css" rel="stylesheet" />
     <!-- Google Fonts-->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <!-- Summernote Fonts-->
+    <link href='./summernote/summernote-lite.min.css' rel='stylesheet' type='text/css' />
 </head>
 
 <body>
@@ -198,7 +200,7 @@ try {
                                             <div class="form-group">
                                                 <label>Summery</label>
                                                 <textarea class="form-control" rows="3" name="blog-summary">
-                                                <?php if (isset($_SESSION['blogTags'])) {
+                                                <?php if (isset($_SESSION['blogSummary'])) {
                                                     echo $_SESSION['blogSummary'];
                                                 } ?>
                                                 </textarea>
@@ -206,7 +208,7 @@ try {
                                             <!-- blog content field -->
                                             <div class="form-group">
                                                 <label>Blog content</label>
-                                                <textarea class="form-control" rows="3" name="blog-content">
+                                                <textarea class="form-control" rows="3" id="summernote" name="blog-content">
                                                 <?php if (isset($_SESSION['blogContent'])) {
                                                     echo $_SESSION['blogContent'];
                                                 } ?>
@@ -297,6 +299,21 @@ try {
     <script src="assets/js/jquery.metisMenu.js"></script>
     <!-- Custom Js -->
     <script src="assets/js/custom-scripts.js"></script>
+
+    <!-- Summernote Js -->
+    <script src="./summernote/summernote.min.js"></script>
+    <!-- start the summernote -->
+    <script>
+        $(document).ready(function() {
+            $('#summernote').summernote({
+                height: 300,
+                minHeight: null,
+                maxHeight: null,
+                focus: false
+            });
+        });
+    </script>
+
     <!-- function in jQuery - for images uploaed -->
     <script>
         function validateImage() {
