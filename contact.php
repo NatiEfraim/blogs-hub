@@ -1,3 +1,10 @@
+<?php
+require './admin/includes/db-pdo.php';
+
+
+?>
+
+<!-- html part -->
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 

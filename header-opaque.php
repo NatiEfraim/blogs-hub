@@ -1,3 +1,31 @@
+<?php
+// ///sql query to get all data from the 'blog_category' table.
+// $sqlCategories = "SELECT * FROM blog_category";
+// $queryCategories = mysqli_query($conn, $sqlCategories);
+require './admin/includes/db-pdo.php';
+// ///sql query to get all data from the 'blog_category' table.
+try {
+    // Query the database to select all blog-category from the "blog_category" table
+    $sqlCategories = $pdoConn->prepare("SELECT * FROM blog_category");
+    $sqlCategories->execute();
+
+    // Fetch all category records as an associative array
+    $allCategories = $sqlCategories->fetchAll(PDO::FETCH_OBJ);
+
+    if (count($allCategories) === 0) {
+        // Handle the case where no admin records were found
+        echo "No categories records found.";
+    }
+} catch (PDOException $e) {
+    // Handle database query errors
+    die("Connection failed: " . $e->getMessage());
+}
+
+
+
+
+?>
+<!-- html part -->
 <header class="s-header s-header--opaque">
 
     <div class="s-header__logo">
@@ -19,28 +47,18 @@
                 <li class="has-children">
                     <a href="./category.php" title="">Categories</a>
                     <ul class="sub-menu">
-                        <li><a href="category.php">Design</a></li>
+                        <!-- loop all categories links -->
+                        <?php foreach ($allCategories as $category) : ?>
+                            <li><a href="./categories.php?group=<?php echo $category->v_category_path; ?>"><?php echo $category->v_category_title; ?></a></li>
 
-                        <!-- <li><a href="category.php">Lifestyle</a></li>
-                        <li><a href="category.php">Photography</a></li>
-                        <li><a href="category.php">Vacation</a></li>
-                        <li><a href="category.php">Work</a></li>
-                        <li><a href="category.php">Health</a></li>
-                        <li><a href="category.php">Family</a></li>
-                        <li><a href="category.php">Relationship</a></li> -->
+                        <?php endforeach; ?>
+
+
 
                     </ul>
                 </li>
 
-                <!-- <li class="has-children">
-                    <a href="#0" title="">Blog</a>
-                    <ul class="sub-menu">
-                        <li><a href="single-video.php">Video Post</a></li>
-                        <li><a href="single-audio.php">Audio Post</a></li>
-                        <li><a href="single-standard.php">Standard Post</a></li>
-                    </ul>
-                </li> -->
-                <!-- <li><a href="styles.php" title="">Styles</a></li> -->
+
 
                 <li><a href="about.php" title="">About</a></li>
                 <li><a href="contact.php" title="">Contact</a></li>

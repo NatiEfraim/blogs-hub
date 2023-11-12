@@ -5,7 +5,7 @@ require './includes/db-pdo.php';
 include './includes/unset-sessions.php';
 try {
     // Query the database to select all blog-category from the "blog_category" table
-    $sqlCategories = $conn->prepare("SELECT * FROM blog_category");
+    $sqlCategories = $pdoConn->prepare("SELECT * FROM blog_category");
     $sqlCategories->execute();
 
     // Fetch all category records as an associative array
