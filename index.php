@@ -12,6 +12,9 @@ if ($rowGetFirstBlog = mysqli_fetch_assoc($queryGetFirstBlog)) {
     $firstBlogTitle = $rowGetFirstBlog['v_post_title'];
     $firstBlogPath = $rowGetFirstBlog['v_post_path'];
     $firstBlogMainImageUrl = $rowGetFirstBlog['v_main_image_url'];
+    // ///name and img author
+    $firstBlogAuthorImageUrl = $rowGetFirstBlog['v_author_image_url'];
+    $firstBlogAuthorName = $rowGetFirstBlog['v_author_name'];
 }
 
 // ////diffine the second select join between the blog_post table and the blog_category table
@@ -25,6 +28,9 @@ if ($rowGetSecondBlog = mysqli_fetch_assoc($queryGetSecondBlog)) {
     $secondBlogTitle = $rowGetSecondBlog['v_post_title'];
     $secondBlogPath = $rowGetSecondBlog['v_post_path'];
     $secondBlogMainImageUrl = $rowGetSecondBlog['v_main_image_url'];
+    // ///name and img author
+    $secondBlogAuthorImageUrl = $rowGetSecondBlog['v_author_image_url'];
+    $secondBlogAuthorName = $rowGetSecondBlog['v_author_name'];
 }
 
 
@@ -39,6 +45,9 @@ if ($rowGetThirdBlog = mysqli_fetch_assoc($queryGetThirdBlog)) {
     $thirdBlogTitle = $rowGetThirdBlog['v_post_title'];
     $thirdBlogPath = $rowGetThirdBlog['v_post_path'];
     $thirdBlogMainImageUrl = $rowGetThirdBlog['v_main_image_url'];
+    // ///name and img author
+    $thirdBlogAuthorImageUrl = $rowGetThirdBlog['v_author_image_url'];
+    $thirdBlogAuthorName = $rowGetThirdBlog['v_author_name'];
 }
 
 //////////////get all blog_post table where status=1 --> active blog.
@@ -122,7 +131,7 @@ $queryGetAllBlogs = mysqli_query($conn, $sqlGetAllBlogs);
                             <span class="byline">
                                 Posted by
                                 <span class="author">
-                                    <a href="#">Prth Modi</a>
+                                    <a href="#"><?php echo $firstBlogAuthorName; ?></a>
                                 </span>
                             </span>
                         </div>
@@ -151,7 +160,7 @@ $queryGetAllBlogs = mysqli_query($conn, $sqlGetAllBlogs);
                             <span class="byline">
                                 Posted by
                                 <span class="author">
-                                    <a href="#">Prth Modi</a>
+                                    <a href="#"><?php echo $secondBlogAuthorName; ?></a>
                                 </span>
                             </span>
                         </div>
@@ -182,7 +191,7 @@ $queryGetAllBlogs = mysqli_query($conn, $sqlGetAllBlogs);
                             <span class="byline">
                                 Posted by
                                 <span class="author">
-                                    <a href="#">Parth Modi</a>
+                                    <a href="#"><?php echo $thirdBlogAuthorName; ?></a>
                                 </span>
                             </span>
                         </div>
@@ -254,6 +263,8 @@ $queryGetAllBlogs = mysqli_query($conn, $sqlGetAllBlogs);
                         $blogPath = $rowGetAllBlogs['v_post_path'];
                         $blogSummary = $rowGetAllBlogs['v_post_summary'];
                         $blogAltImageUrl = $rowGetAllBlogs['v_alt_image_url'];
+                        $blogAuthorImageUrl = $rowGetAllBlogs['v_author_image_url'];
+                        $blogAuthorName = $rowGetAllBlogs['v_author_name'];
 
                     ?>
 
@@ -272,7 +283,7 @@ $queryGetAllBlogs = mysqli_query($conn, $sqlGetAllBlogs);
                                     <div class="entry__meta">
                                         <span class="byline">By:
                                             <span class='author'>
-                                                <a href="#">Parth Modi</a>
+                                                <a href="#"><?php echo $blogAuthorName; ?></a>
                                             </span>
                                         </span>
 

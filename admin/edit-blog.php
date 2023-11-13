@@ -26,6 +26,10 @@ if (isset($_REQUEST['blogid'])) {
         $_SESSION['editSummary'] = $rowGetBlogDetails['v_post_summary'];
         $_SESSION['editContent'] = $rowGetBlogDetails['v_post_content'];
         $_SESSION['editPath'] = $rowGetBlogDetails['v_post_path'];
+        // // ////save in session the author-img and the author-mame
+        // $_SESSION['editAuthorImage'] = $rowGetBlogDetails['v_author_image_url']; ///save the author-img
+        $_SESSION['editAuthorName'] = $rowGetBlogDetails['v_author_name']; ///save the author-name
+
         $_SESSION['editHomePagePlacement'] = $rowGetBlogDetails['n_home_page_placement'];
     } else {
         // ////in case the futch went wrong.
@@ -47,12 +51,16 @@ if (isset($_REQUEST['blogid'])) {
     exit();
 }
 if (isset($_SESSION['editBlogId'])) {
-    // /////get the 2 colums of img from the 'blog_post' table by editBlogId from session. 
+    // /////get the 3 colums of img from the 'blog_post' table by editBlogId from session. 
     $sqlGetImages = "SELECT * FROM blog_post WHERE n_blog_post_id = '" . $_SESSION['editBlogId'] . "'";
     $queryGetImages = mysqli_query($conn, $sqlGetImages);
     if ($rowGetImages = mysqli_fetch_assoc($queryGetImages)) {
-        $mainImgUrl = $rowGetImages['v_main_image_url'];
-        $altImgUrl = $rowGetImages['v_alt_image_url'];
+        $mainImgUrl = $rowGetImages['v_main_image_url']; ///get main img url
+        $altImgUrl = $rowGetImages['v_alt_image_url']; ///get alt img url
+        $authorImgUrl = $rowGetImages['v_author_image_url']; ///get author img url
+        // ////save in session the author-img and the author-mame
+        // $_SESSION['editAuthorImage'] = $rowGetBlogDetails['v_author_image_url']; ///save the author-img
+        // $_SESSION['editAuthorName'] = $rowGetBlogDetails['v_author_name']; ///save the author-name
     }
 }
 
@@ -197,19 +205,28 @@ if (isset($_SESSION['editBlogId'])) {
 
                                             <!-- Title -->
                                             <div class="form-group">
-                                                <label>Title</label>
+                                                <label>Update Title</label>
                                                 <input class="form-control" name="blog-title" value="<?php if (isset($_SESSION['editTitle'])) {
                                                                                                             echo $_SESSION['editTitle'];
                                                                                                         } ?>">
                                             </div>
                                             <!-- meta Title -->
                                             <div class="form-group">
-                                                <label>meta Title</label>
+                                                <label>Update meta Title</label>
                                                 <input class="form-control" name="blog-meta-title" value="<?php if (isset($_SESSION['editMetaTitle'])) {
                                                                                                                 echo $_SESSION['editMetaTitle'];
                                                                                                             } ?>">
                                             </div>
 
+
+
+                                            <!-- author name -->
+                                            <div class="form-group">
+                                                <label>Update Author Name</label>
+                                                <input class="form-control" name="blog-author-name" value="<?php if (isset($_SESSION['editAuthorName'])) {
+                                                                                                                echo $_SESSION['editAuthorName'];
+                                                                                                            } ?>">
+                                            </div>
                                             <!-- select category -->
                                             <div class="form-group">
                                                 <label>Selects Blog category</label>
@@ -236,7 +253,6 @@ if (isset($_SESSION['editBlogId'])) {
                                                     ?>
                                                 </select>
                                             </div>
-
                                             <!-- upload imag -->
                                             <div class="form-group">
                                                 <label>Update Main Image</label>
@@ -260,6 +276,23 @@ if (isset($_SESSION['editBlogId'])) {
                                                 }
                                                 ?>
                                             </div>
+                                            <!-- Author image -->
+                                            <div class="form-group">
+                                                <label>Update Author Image</label>
+                                                <input type="file" name="author-blog-image" id="author-blog-image">
+                                                <?php
+                                                // ///in case the is selected author img
+                                                if (!empty($authorImgUrl)) {
+                                                    echo "<p style='font-size:inherit;'><a href='' data-toggle='modal' data-target='#author-image' class='popup-button' style='margin-top:10px'>View Existing Image</a></p>";
+                                                }
+                                                ?>
+                                            </div>
+
+
+
+
+
+
                                             <!-- inputs summary text -->
                                             <div class="form-group">
                                                 <label>Summery</label>
@@ -271,7 +304,7 @@ if (isset($_SESSION['editBlogId'])) {
                                             </div>
                                             <!-- blog content field -->
                                             <div class="form-group">
-                                                <label>Blog content</label>
+                                                <label>Update Blog content</label>
                                                 <textarea class="form-control" rows="3" id="summernote" name="blog-content">
                                                 <?php if (isset($_SESSION['editContent'])) {
                                                     echo $_SESSION['editContent'];
@@ -280,7 +313,7 @@ if (isset($_SESSION['editBlogId'])) {
                                             </div>
                                             <!-- blog tag field -->
                                             <div class="form-group">
-                                                <label>Blog Tag (saperate by comma)</label>
+                                                <label>Update Blog Tag (saperate by comma)</label>
                                                 <input class="form-control" name="blog-tags" value="<?php if (isset($_SESSION['editTags'])) {
                                                                                                         echo $_SESSION['editTags'];
                                                                                                     } ?>">
@@ -330,6 +363,7 @@ if (isset($_SESSION['editBlogId'])) {
                                     </div>
                                 </div>
                                 <!-- /.row (nested) -->
+
                                 <?php if (!empty($mainImgUrl)) : ?>
                                     <!-- main img moadl -->
                                     <div class="modal fade" id="main-image" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -349,6 +383,7 @@ if (isset($_SESSION['editBlogId'])) {
                                         </div>
                                     </div>
                                 <?php endif; ?>
+
                                 <!-- alt img moadl -->
                                 <?php if (!empty($altImgUrl)) : ?>
                                     <div class="modal fade" id="alt-image" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -360,6 +395,26 @@ if (isset($_SESSION['editBlogId'])) {
                                                 </div>
                                                 <div class="modal-body">
                                                     <img src="<?php echo $altImgUrl; ?>" style="max-width:100%; height:auto;" />
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- author img moadl -->
+                                <?php if (!empty($authorImgUrl)) : ?>
+                                    <div class="modal fade" id="author-image" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                    <h4 class="modal-title" id="myModalLabel">Author Image</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <img src="<?php echo $authorImgUrl; ?>" style="max-width:100%; height:auto;" />
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

@@ -5,7 +5,7 @@ require './admin/includes/dbh.php';
 if (isset($_REQUEST['blog'])) {
     ///grab the blogPath
     $blogPath = $_REQUEST['blog'];
-    /////diffine the sql query
+    /////diffine the sql query get all blog_post by the specific blogpath
     $sqlGetBlog = "SELECT * FROM blog_post WHERE v_post_path = '$blogPath' AND f_post_status = '1'";
     $queryGetBlog = mysqli_query($conn, $sqlGetBlog);
     /////try run the query - and get the data
@@ -18,6 +18,9 @@ if (isset($_REQUEST['blog'])) {
         $blogContent = $rowGetBlog['v_post_content'];
         $blogMainImgUrl = $rowGetBlog['v_main_image_url'];
         $blogCreationDate = $rowGetBlog['d_date_created'];
+        // ////get the name and the img of the author
+        $blogAuthorImageUrl = $rowGetBlog['v_author_image_url'];
+        $blogAuthorName = $rowGetBlog['v_author_name'];
     } else {
         /////there is nothing to show up - redirect index.php
         header("Location: ./index.php");
@@ -134,11 +137,11 @@ if (isset($_REQUEST['blog'])) {
 
                             <div class="entry-author meta-blk">
                                 <div class="author-avatar">
-                                    <img class="avatar" src="images/avatars/user-06.jpg" alt="">
+                                    <img class="avatar" src="<?php echo $blogAuthorImageUrl; ?>" alt="">
                                 </div>
                                 <div class="byline">
                                     <span class="bytext">Posted By</span>
-                                    <a href="#">Prth Modi</a>
+                                    <a href="#"><?php echo $blogAuthorName; ?></a>
                                 </div>
                             </div>
 
@@ -148,8 +151,7 @@ if (isset($_REQUEST['blog'])) {
                                     <div class="cat-links">
                                         <span>In</span>
                                         <a href="./categories.php?group=<?php echo $blogCategoryPath; ?>"><?php echo $categoryTitle; ?></a>
-                                        <!-- <a href="#0">Design</a>
-                                        <a href="#0">Work</a> -->
+
                                     </div>
                                     <!-- date created. -->
                                     <span>On</span>
@@ -169,10 +171,6 @@ if (isset($_REQUEST['blog'])) {
                                     }
 
                                     ?>
-                                    <!-- <a href="#">orci</a>
-                                    <a href="#">lectus</a>
-                                    <a href="#">varius</a>
-                                    <a href="#">turpis</a> -->
                                 </div>
 
                             </div>
@@ -216,18 +214,6 @@ if (isset($_REQUEST['blog'])) {
 
                             ?>
 
-                            <!-- <div class="prev-nav">
-                                <a href="#" rel="prev">
-                                    <span>Previous</span>
-                                    Tips on Minimalist Design
-                                </a>
-                            </div>
-                            <div class="next-nav">
-                                <a href="#" rel="next">
-                                    <span>Next</span>
-                                    A Practical Guide to a Minimalist Lifestyle.
-                                </a>
-                            </div> -->
                         </div>
                         <!-- end s-content__pagenav -->
 
@@ -239,173 +225,127 @@ if (isset($_REQUEST['blog'])) {
 
 
         <!-- comments
+        
         ================================================== -->
+        <!-- handel with the comments -->
+        <?php
+        ////get all comments from the database
+        $sqlGetAllComments = "SELECT * FROM blog_comments WHERE n_blog_post_id = '$blogPostId'";
+        $queryGetAllComments = mysqli_query($conn, $sqlGetAllComments);
+        $numComments = mysqli_num_rows($queryGetAllComments);
+
+        ?>
         <div class="comments-wrap">
 
             <div id="comments" class="row">
                 <div class="column large-12">
 
-                    <h3>5 Comments</h3>
+                    <h3><?php echo $numComments; ?> Comments</h3>
 
                     <!-- START commentlist -->
-                    <ol class="commentlist">
+                    <ol class="commentlist" id="commentlist">
 
-                        <li class="depth-1 comment">
+                        <?php
+                        /////get all comment from the 'blog_comments' table - where has no parents - mean first comments
+                        $sqlGetComments = "SELECT * FROM blog_comments WHERE n_blog_post_id = '$blogPostId' AND n_blog_comment_parent_id = '0' ORDER BY d_date_created ASC";
+                        $queryGetComments = mysqli_query($conn, $sqlGetComments); ////run the query in database
 
-                            <div class="comment__avatar">
-                                <img class="avatar" src="images/avatars/user-01.jpg" alt="" width="50" height="50">
-                            </div>
+                        while ($rowComments = mysqli_fetch_assoc($queryGetComments)) {
+                            /////get and save all data we need - for the haed comment
+                            $commentId = $rowComments['n_blog_comment_id'];
+                            $commentAuthor = $rowComments['v_comment_author'];
+                            $comment = $rowComments['v_comment'];
+                            $commentDate = $rowComments['d_date_created'];
+                            ////check about this is comments if has replay comments
+                            $sqlCheckCommentChildren = "SELECT * FROM blog_comments WHERE n_blog_comment_parent_id = '$commentId' ORDER BY d_date_created ASC";
+                            $queryCheckCommentChildren = mysqli_query($conn, $sqlCheckCommentChildren); ////run the query in database
+                            $numCommentChildren = mysqli_num_rows($queryCheckCommentChildren); ///get num of row of replay
+                            ///In case has no replay
+                            if ($numCommentChildren == 0) {
 
-                            <div class="comment__content">
+                        ?>
 
-                                <div class="comment__info">
-                                    <div class="comment__author">Itachi Uchiha</div>
-
-                                    <div class="comment__meta">
-                                        <div class="comment__time">Oct 05, 2020</div>
-                                        <div class="comment__reply">
-                                            <a class="comment-reply-link" href="#0">Reply</a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="comment__text">
-                                    <p>Adhuc quaerendum est ne, vis ut harum tantas noluisse, id suas iisque mei. Nec te inani ponderum vulputate,
-                                        facilisi expetenda has et. Iudico dictas scriptorem an vim, ei alia mentitum est, ne has voluptua praesent.</p>
-                                </div>
-
-                            </div>
-
-                        </li> <!-- end comment level 1 -->
-
-                        <li class="thread-alt depth-1 comment">
-
-                            <div class="comment__avatar">
-                                <img class="avatar" src="images/avatars/user-04.jpg" alt="" width="50" height="50">
-                            </div>
-
-                            <div class="comment__content">
-
-                                <div class="comment__info">
-                                    <div class="comment__author">John Doe</div>
-
-                                    <div class="comment__meta">
-                                        <div class="comment__time">Oct 05, 2020</div>
-                                        <div class="comment__reply">
-                                            <a class="comment-reply-link" href="#0">Reply</a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="comment__text">
-                                    <p>Sumo euismod dissentiunt ne sit, ad eos iudico qualisque adversarium, tota falli et mei. Esse euismod
-                                        urbanitas ut sed, et duo scaevola pericula splendide. Primis veritus contentiones nec ad, nec et
-                                        tantas semper delicatissimi.</p>
-                                </div>
-
-                            </div>
-
-                            <ul class="children">
-
-                                <li class="depth-2 comment">
-
-                                    <div class="comment__avatar">
-                                        <img class="avatar" src="images/avatars/user-03.jpg" alt="" width="50" height="50">
-                                    </div>
-
+                                <li class="depth-1 comment">
                                     <div class="comment__content">
-
                                         <div class="comment__info">
-                                            <div class="comment__author">Kakashi Hatake</div>
-
+                                            <!-- get the comment-author-id -->
+                                            <input type="hidden" id="comment-author-<?php echo $commentId; ?>" value="<?php echo $commentAuthor; ?>">
+                                            <div class="comment__author"><?php echo $commentAuthor; ?></div>
                                             <div class="comment__meta">
-                                                <div class="comment__time">Oct 05, 2020</div>
+                                                <div class="comment__time"><?php echo date("M j, Y", strtotime($commentDate)); ?></div>
                                                 <div class="comment__reply">
-                                                    <a class="comment-reply-link" href="#0">Reply</a>
+                                                    <a class="comment-reply-link" href="#reply-comment-section" onclick="prepareReply('<?php echo $commentId; ?>');">Reply</a>
                                                 </div>
                                             </div>
                                         </div>
-
                                         <div class="comment__text">
-                                            <p>Duis sed odio sit amet nibh vulputate
-                                                cursus a sit amet mauris. Morbi accumsan ipsum velit. Duis sed odio sit amet nibh vulputate
-                                                cursus a sit amet mauris</p>
+                                            <p><?php echo $comment; ?></p>
                                         </div>
-
                                     </div>
-
-                                    <ul class="children">
-
-                                        <li class="depth-3 comment">
-
-                                            <div class="comment__avatar">
-                                                <img class="avatar" src="images/avatars/user-04.jpg" alt="" width="50" height="50">
-                                            </div>
-
-                                            <div class="comment__content">
-
-                                                <div class="comment__info">
-                                                    <div class="comment__author">John Doe</div>
-
-                                                    <div class="comment__meta">
-                                                        <div class="comment__time">Oct 04, 2020</div>
-                                                        <div class="comment__reply">
-                                                            <a class="comment-reply-link" href="#0">Reply</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="comment__text">
-                                                    <p>Investigationes demonstraverunt lectores legere me lius quod ii legunt saepius. Claritas est
-                                                        etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.</p>
-                                                </div>
-
-                                            </div>
-
-                                        </li>
-
-                                    </ul>
-
                                 </li>
 
-                            </ul>
+                            <?php
 
-                        </li> <!-- end comment level 1 -->
+                            } else {
+                                //// in case the comment id has replys - show all.
+                            ?>
 
-                        <li class="depth-1 comment">
-
-                            <div class="comment__avatar">
-                                <img class="avatar" src="images/avatars/user-02.jpg" alt="" width="50" height="50">
-                            </div>
-
-                            <div class="comment__content">
-
-                                <div class="comment__info">
-                                    <div class="comment__author">Shikamaru Nara</div>
-
-                                    <div class="comment__meta">
-                                        <div class="comment__time">Oct 03, 2020</div>
-                                        <div class="comment__reply">
-                                            <a class="comment-reply-link" href="#0">Reply</a>
+                                <li class="thread-alt depth-1 comment">
+                                    <div class="comment__content">
+                                        <div class="comment__info">
+                                            <input type="hidden" id="comment-author-<?php echo $commentId; ?>" value="<?php echo $commentAuthor; ?>">
+                                            <div class="comment__author"><?php echo $commentAuthor; ?></div>
+                                            <div class="comment__meta">
+                                                <div class="comment__time"><?php echo date("M j, Y", strtotime($commentDate)); ?></div>
+                                                <div class="comment__reply">
+                                                    <!-- send the function of adding comment -->
+                                                    <a class="comment-reply-link" href="#reply-comment-section" onclick="prepareReply('<?php echo $commentId; ?>');">Reply</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="comment__text">
+                                            <p><?php echo $comment; ?></p>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="comment__text">
-                                    <p>Typi non habent claritatem insitam; est usus legentis in iis qui facit eorum claritatem.</p>
-                                </div>
+                            <?php
 
-                            </div>
+                                while ($rowCommentChildren = mysqli_fetch_assoc($queryCheckCommentChildren)) {
+                                    ////save all replay comments from database - for the replay comments
+                                    $commentIdChild = $rowCommentChildren['n_blog_comment_id'];
+                                    $commentAuthorChild = $rowCommentChildren['v_comment_author'];
+                                    $commentChild = $rowCommentChildren['v_comment'];
+                                    $commentDateChild = $rowCommentChildren['d_date_created'];
 
-                        </li> <!-- end comment level 1 -->
+                                    echo "<ul class='children'>
+                                            <li class='depth-2 comment'>
+                                                <div class='comment__content'>
+                                                    <div class='comment__info'>
+                                                        <div class='comment__author'>" . $commentAuthorChild . "</div>
+                                                        <div class='comment__meta'>
+                                                            <div class='comment__time'>" . date("M j, Y", strtotime($commentDateChild)) . "</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class='comment__text'>
+                                                        <p>" . $commentChild . "</p>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>";
+                                }
+                            }
+                        }
 
+                            ?>
+
+                                </li>
                     </ol>
                     <!-- END commentlist -->
 
                 </div> <!-- end col-full -->
             </div> <!-- end comments -->
 
-
+            <!-- add-comment form -->
             <div class="row comment-respond">
 
                 <!-- START respond -->
@@ -415,28 +355,33 @@ if (isset($_REQUEST['blog'])) {
                         Add Comment
                         <span>Your email address will not be published.</span>
                     </h3>
+                    <!-- msg for user after adding aommnet -->
+                    <p style="color:green;display:none;" id="comment-success">Your comment was added successfully.</p>
+                    <p style="color:red;display:none;" id="comment-error"></p>
 
-                    <form name="contactForm" id="contactForm" method="post" action="" autocomplete="off">
+                    <form name="commentForm" id="commentForm">
                         <fieldset>
-
+                            <!-- get the blog-post-id by hidden input -->
+                            <input type="hidden" name="replyBlogPostId" id="replyBlogPostId" value="<?php echo $blogPostId; ?>">
+                            <!-- fill your name -->
                             <div class="form-field">
                                 <input name="cName" id="cName" class="h-full-width h-remove-bottom" placeholder="Your Name" value="" type="text">
                             </div>
-
+                            <!-- fill your email -->
                             <div class="form-field">
                                 <input name="cEmail" id="cEmail" class="h-full-width h-remove-bottom" placeholder="Your Email" value="" type="text">
                             </div>
 
-                            <div class="form-field">
+                            <!-- <div class="form-field">
                                 <input name="cWebsite" id="cWebsite" class="h-full-width h-remove-bottom" placeholder="Website" value="" type="text">
-                            </div>
+                            </div> -->
 
                             <div class="message form-field">
                                 <textarea name="cMessage" id="cMessage" class="h-full-width" placeholder="Your Message"></textarea>
                             </div>
 
                             <br>
-                            <input name="submit" id="submit" class="btn btn--primary btn-wide btn--large h-full-width" value="Add Comment" type="submit">
+                            <input name="submit" id="sumbitCommentForm" class="btn btn--primary btn-wide btn--large h-full-width" value="Add Comment" type="submit">
 
                         </fieldset>
                     </form> <!-- end form -->
@@ -461,8 +406,86 @@ if (isset($_REQUEST['blog'])) {
     <!-- Java Script
     ================================================== -->
     <script src="js/jquery-3.5.0.min.js"></script>
+    <!-- jQuery latest cdn -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="js/plugins.js"></script>
     <script src="js/main.js"></script>
+
+    <!-- all function in jQuery of replay or add comment -->
+    <script>
+        // ///main first function
+        $(document).ready(function() {
+            prepareComment();
+        });
+        // ////function check input of email.
+        function checkEmail(email) {
+            var regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            if (!regex.test(email)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        // ///function of show add-commnet and hide replay-comment
+        function prepareComment() {
+            $("#comment-success").css("display", "none");
+            $("#comment-error").css("display", "none");
+            $("#reply-comment-section").hide();
+            $("#add-comment-section").show();
+        }
+        // ////function of deal with the add-comment form
+        $(document).on('submit', '#commentForm', function(e) {
+            ////prevent defalt
+            e.preventDefault();
+            ////hide the msg from user
+            $("#comment-success").css("display", "none");
+            $("#comment-error").css("display", "none");
+            //////get val inputs
+            var name = $("#cName").val();
+            var email = $("#cEmail").val();
+            var comment = $("#cMessage").val();
+            /////check for any error
+            if (!name || !email || !comment) {
+                $("#comment-error").css("display", "block");
+                $("#comment-error").html("Please fill all fields.");
+            } else if (name.length > 50) {
+                $("#comment-error").css("display", "block");
+                $("#comment-error").html("The name input field can only be a max of 50 characters.");
+            } else if (email.length > 50) {
+                $("#comment-error").css("display", "block");
+                $("#comment-error").html("The email input field can only be a max of 50 characters.");
+            } else if (comment.length > 500) {
+                $("#comment-error").css("display", "block");
+                $("#comment-error").html("The comment input field can only be a max of 500 characters.");
+            } else if (checkEmail(email) == false) {
+                $("#comment-error").css("display", "block");
+                $("#comment-error").html("Please enter a valid email address.");
+            } else {
+                /////config the add-comment
+                var date = new Date();
+                var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+                /////diffine the date
+                var dateFormatted = months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
+
+                $.ajax({
+                    method: "POST",
+                    url: "includes/add-comment.php",
+                    data: $(this).serialize(),
+                    success: function(data) {
+                        if (data == "success") {
+                            var newComment = "<li class='depth-1 comment><div class='comment__content'><div class='comment__info'><div class='comment__author'>" + name + "</div><div class='comment__meta'><div class='comment__time'>" + dateFormatted + "</div></div></div><div class='comment__text'><p>" + comment + "</p></div></div></li>";
+                            $("#comment-success").css("display", "block");
+                            $("#commentlist").append(newComment);
+                            $("#commentForm").hide();
+                        } else {
+                            $("#comment-error").css("display", "block");
+                            $("#comment-error").html("There was an error while adding your comment. Please try again later.");
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 
 </body>
 

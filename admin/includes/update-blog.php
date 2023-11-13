@@ -1,107 +1,103 @@
 <?php
-
 require "dbh.php";
 session_start();
-// ////check the form from the edit-blog.php
+
+// Function to safely escape and quote string values for SQL queries
+function escapeString($conn, $value)
+{
+    return mysqli_real_escape_string($conn, $value);
+}
+
+
 if (isset($_POST['submit-edit-blog'])) {
-    //////grab all inputs from the form of edit-blog.php.
+    // ///get all inputs from the form edit-blog
     $blogId = $_POST['blog-id'];
-    $title = $_POST['blog-title'];
-    $metaTitle = $_POST['blog-meta-title'];
+    $title = escapeString($conn, $_POST['blog-title']);
+    $metaTitle = escapeString($conn, $_POST['blog-meta-title']);
     $blogCategoryId = $_POST['blog-category'];
-    $blogSummary = $_POST['blog-summary'];
-    $blogContent = $_POST['blog-content'];
-    $blogTags = $_POST['blog-tags'];
-    $blogPath = $_POST['blog-path'];
+    $blogSummary = escapeString($conn, $_POST['blog-summary']);
+    $blogContent = escapeString($conn, $_POST['blog-content']);
+    $blogTags = escapeString($conn, $_POST['blog-tags']);
+    $blogPath = escapeString($conn, $_POST['blog-path']);
     $homePagePlacement = $_POST['blog-home-page-placement'];
-    /////carete date and time of changes.
+    $blogAuthorName = escapeString($conn, $_POST['blog-author-name']);
+    ///ceate date and time
     $date = date("Y-m-d");
     $time = date("H:i:s");
-    ///////check for any empty inputs.
-    if (empty($title)) {
-        formError("emptytitle");
-    } else if (empty($blogCategoryId)) {
-        formError("emptycategory");
-    } else if (empty($blogSummary)) {
-        formError("emptysummary");
-    } else if (empty($blogContent)) {
-        formError("emptycontent");
-    } else if (empty($blogTags)) {
-        formError("emptytags");
-    } else if (empty($blogPath)) {
-        formError("emptypath");
-    }
 
+    // Check for empty inputs
+    if (empty($title) || empty($blogCategoryId) || empty($blogSummary) || empty($blogContent) || empty($blogTags) || empty($blogPath) || empty($blogAuthorName)) {
+        formError("Some fields are empty."); ////send error msg to user
+    }
+    //////blog-path error
     if (strpos($blogPath, " ") !== false) {
-        formError("pathcontainsspaces");
+        formError("Path contains spaces.");
     }
 
     if (empty($homePagePlacement)) {
-        $homePagePlacement = 0;
+        $homePagePlacement = 0; // Default choice
     }
-    ///////diffine the sql query for the blog_title and the blog_path
-    $sqlCheckBlogTitle = "SELECT v_post_title FROM blog_post WHERE v_post_title = '$title' AND v_post_title != '$title' AND f_post_status != '2'";
-    $queryCheckBlogTitle = mysqli_query($conn, $sqlCheckBlogTitle);
 
-    $sqlCheckBlogPath = "SELECT v_post_path FROM blog_post WHERE v_post_path = '$blogPath' AND v_post_path != '$blogPath' AND f_post_status != '2'";
-    $queryCheckBlogPath = mysqli_query($conn, $sqlCheckBlogPath);
-    /////send msg to the user of taken inputs in database
-    if (mysqli_num_rows($queryCheckBlogTitle) > 0) {
-        formError("titlebeingused");
-    } else if (mysqli_num_rows($queryCheckBlogPath) > 0) {
-        formError("pathbeingused");
-    }
-    ////////Handle with the homepageplacement
+    // Update home page placement if needed
     if ($homePagePlacement != 0) {
-
-        $sqlCheckBlogHomePagePlacement = "SELECT * FROM blog_post WHERE n_home_page_placement = '$homePagePlacement' AND f_post_status != '2'";
-        $queryCheckBlogHomePagePlacement = mysqli_query($conn, $sqlCheckBlogHomePagePlacement);
-
-        if (mysqli_num_rows($queryCheckBlogHomePagePlacement)) {
-
-            $sqlUpdateBlogHomePagePlacement = "UPDATE blog_post SET n_home_page_placement = '0' WHERE n_home_page_placement = '$homePagePlacement' AND f_post_status != '2'";
-
-            if (!mysqli_query($conn, $sqlUpdateBlogHomePagePlacement)) {
-                formError("homepageplacementerror");
-            }
+        $sqlUpdateBlogHomePagePlacement = "UPDATE blog_post SET n_home_page_placement = '0' WHERE n_home_page_placement = '$homePagePlacement' AND f_post_status != '2'";
+        if (!mysqli_query($conn, $sqlUpdateBlogHomePagePlacement)) {
+            formError("Failed to update home page placement.");
         }
     }
-    //////send to the update and upload file function.
+    //////handel with the immages files in the database
     $mainImgUrl = uploadImage($_FILES["main-blog-image"]["name"], "main-blog-image", "main", "v_main_image_url");
     $altImgUrl = uploadImage($_FILES["alt-blog-image"]["name"], "alt-blog-image", "alt", "v_alt_image_url");
-    ////////update data changes with divided files if changes.
-    if ($mainImgUrl == "noupdate") {
-        if ($altImgUrl == "noupdate") {
-            // ////In case the main img and alt img not changed
-            $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
-        } else {
-            // ///just the main img has been changed
-            $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', v_alt_image_url = '$altImgUrl', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
-        }
-    } else if ($altImgUrl == "noupdate") {
-        if ($mainImgUrl != "noupdate") {
-            //////////just alt img has been changed
-            $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', v_main_image_url = '$mainImgUrl', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
-        }
+    $authorImgUrl = uploadImage($_FILES["author-blog-image"]["name"], "author-blog-image", "author", "v_author_image_url");
+    // Construct and execute the SQL query
+    if (($mainImgUrl == "noupdate") && ($altImgUrl == "noupdate") && ($authorImgUrl == "noupdate")) {
+        /////nothing from the images files has been chagnes
+        ///diffine the query
+        $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', v_author_name = '$blogAuthorName', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
+    } else if (($mainImgUrl == "noupdate") && ($altImgUrl == "noupdate")) {
+        /////just the author image file has been chagnes
+        ///diffine the query
+        $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent',v_author_image_url='$authorImgUrl', v_author_name = '$blogAuthorName', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
+    } else if (($altImgUrl == "noupdate") && ($authorImgUrl == "noupdate")) {
+        /////just the main image file has been chagnes
+        ///diffine the query
+        $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent',v_main_image_url='$mainImgUrl', v_author_name = '$blogAuthorName', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
+    } else if (($mainImgUrl == "noupdate") && ($authorImgUrl == "noupdate")) {
+        /////just the alt image file has been chagnes
+        ///diffine the query
+        $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent',v_alt_image_url='$altImgUrl', v_author_name = '$blogAuthorName', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
     } else {
-        /////main img and alt img has been changed
-        $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', v_main_image_url = '$mainImgUrl', v_alt_image_url = '$altImgUrl', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
+        /////need to change all the 3 images files in the database
+        ///diffine the query
+        $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent',v_main_image_url='$mainImgUrl',v_alt_image_url='$altImgUrl',v_author_image_url='$authorImgUrl', v_author_name = '$blogAuthorName', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
     }
-    //////here update data in the 'blog_tags' table
-    $sqlUpdateBlogTags = "UPDATE blog_tags SET v_tag = '$blogTags' WHERE n_blog_post_id = '$blogId'";
+    /////genera; sql update.
+    // $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', v_author_name = '$blogAuthorName', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
 
-    //////check if the query sql run propaply.
-    if (mysqli_query($conn, $sqlUpdateBlog) && mysqli_query($conn, $sqlUpdateBlogTags)) {
-        formSuccess();////send updateblog msg - success.
+    if (mysqli_query($conn, $sqlUpdateBlog)) {
+        // Update blog_tags table
+        $sqlUpdateBlogTags = "UPDATE blog_tags SET v_tag = '$blogTags' WHERE n_blog_post_id = '$blogId'";
+        if (mysqli_query($conn, $sqlUpdateBlogTags)) {
+            formSuccess();
+        } else {
+            ////feil try to uplad to data
+            formError("Failed to update blog_tags table.");
+        }
     } else {
-        formError("sqlerror");////send updateblog msg - error.
+        formError("SQL error: " . mysqli_error($conn));
     }
-} else {
-    /////rediirect to the inde.php - no btn has been preesed
-    header("Location: ../index.php");
-    exit();
 }
-///////form of success msg
+
+
+
+
+
+
+
+
+//////////////////////////Functions
+
+/////form of success msg
 function formSuccess()
 {
 
@@ -116,6 +112,9 @@ function formSuccess()
     unset($_SESSION['editContent']);
     unset($_SESSION['editPath']);
     unset($_SESSION['editTags']);
+
+    unset($_SESSION['editAuthorName']); ////un-set edit-authorName
+
     unset($_SESSION['editHomePagePlacement']);
     //////redirrect with the success sg
     header("Location: ../blogs.php?updateblog=success");
@@ -199,219 +198,5 @@ function uploadImage($img, $imgName, $imgType, $imgDbColumn)
 ?>
 
 
-<?php
-
-// include './dbh.php';
-// session_start();
-
-// // Handle the form
-// if (isset($_POST['submit-edit-blog'])) {
-
-//     // Retrieve user input from the form
-//     $title = $_POST['blog-title'];
-//     $metaTitle = $_POST['blog-meta-title'];
-//     $blogCategoryId = $_POST['blog-category'];
-//     $blogSummary = $_POST['blog-summary'];
-//     $blogContent = $_POST['blog-content'];
-//     $blogTags = $_POST['blog-tags'];
-//     $blogPath = $_POST['blog-path'];
-//     $homePagePlacement = $_POST['blog-home-page-placement'];
-//     // create time create a blog 
-//     $date = date("Y-m-d");
-//     $time = date("H:i:s");
-
-//     // chaecking input if are correct or emty filed
-//     if (empty($title)) {
-//         formError("emptytitle");
-//     } else if (empty($blogCategoryId)) {
-//         formError("emptycategory");
-//     } else if (empty($blogSummary)) {
-//         formError("emptysummary");
-//     } else if (empty($blogContent)) {
-//         formError("emptycontent");
-//     } else if (empty($blogTags)) {
-//         formError("emptytags");
-//     } else if (empty($blogPath)) {
-//         formError("emptypath");
-//     }
-//     // path contain spaces.
-//     if (strpos($blogPath, " ") !== false) {
-//         formError("pathcontainsspaces");
-//     }
-//     // defualt home-pacement
-//     if (empty($homePagePlacement)) {
-//         $homePagePlacement = 0;
-//     }
-//     // /////check if there is blog_title or blog_path has been used.
-//     $sqlCheckBlogTitle = "SELECT v_post_title FROM blog_post WHERE v_post_title = '$title' AND v_post_title != '$title' AND f_post_status != '2'";
-//     $queryCheckBlogTitle = mysqli_query($conn, $sqlCheckBlogTitle);
-
-//     $sqlCheckBlogPath = "SELECT v_post_path FROM blog_post WHERE v_post_path = '$blogPath' AND v_post_path != '$blogPath' AND f_post_status != '2'";
-//     $queryCheckBlogPath = mysqli_query($conn, $sqlCheckBlogPath);
-
-//     // send msg error.
-//     if (mysqli_num_rows($queryCheckBlogTitle) > 0) {
-//         formError("titlebeingused");
-//     } else if (mysqli_num_rows($queryCheckBlogPath) > 0) {
-//         formError("pathbeingused");
-//     }
-//     // /////check about the homePagePlacement if is chooded
-//     if ($homePagePlacement != 0) {
-//         // ///replace homePagePlacement.
-//         $sqlCheckBlogHomePagePlacement = "SELECT * FROM blog_post WHERE n_home_page_placement = '$homePagePlacement' AND f_post_status != '2'";
-//         $queryCheckBlogHomePagePlacement = mysqli_query($conn, $sqlCheckBlogHomePagePlacement);
-//         // ////homePagePlacement has been taken -> replace them.
-//         if (mysqli_num_rows($queryCheckBlogHomePagePlacement)) {
-
-//             $sqlUpdateBlogHomePagePlacement = "UPDATE blog_post SET n_home_page_placement = '0' WHERE n_home_page_placement = '$homePagePlace' AND f_post_status != '2'";
-//             // ///sql query not has been succesessfully.
-//             if (!mysqli_query($conn, $sqlUpdateBlogHomePagePlacement)) {
-//                 // //////send error msg.
-//                 formError("homepageplacementerror");
-//             }
-//         }
-//     }
-//     // ////diffine mainImgUrl and altImgUrl.
-//     // ///use the function.
-//     $mainImgUrl = uploadImage($_FILES["main-blog-image"]["name"], "main-blog-image", "main", "v_main_image_url");
-//     $altImgUrl = uploadImage($_FILES["alt-blog-image"]["name"], "alt-blog-image", "alt", "v_alt_image_url");
-
-//     // ///check if there is any changes in the files upload img.
-//     if ($mainImgUrl == "noupdate") {
-//         // ///in case no chagnes in main img colum
-//         if ($altImgUrl == "noupdate") {
-//             // ///in case no chagnes in main img and in alt img colums
-//             $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
-//         } else {
-//             // ///in case no chagnes in main img colum only.
-//             $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', v_alt_image_url = '$altImgUrl', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
-//         }
-//     } else if ($altImgUrl == "noupdate") {
-//         // ///in case no chagnes in alt img colum
-//         if ($mainImgUrl != "noupdate") {
-//             // ///in case no chagnes in main img and in alt img colums
-//             $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', v_main_image_url = '$mainImgUrl', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
-//         }
-//     } else {
-//         // ///in case there is changes in main img and in alt img colums.
-//         $sqlUpdateBlog = "UPDATE blog_post SET n_category_id = '$blogCategoryId', v_post_title = '$title', v_post_meta_title = '$metaTitle', v_post_path = '$blogPath', v_post_summary = '$blogSummary', v_post_content = '$blogContent', v_main_image_url = '$mainImgUrl', v_alt_image_url = '$altImgUrl', n_home_page_placement = '$homePagePlacement', d_date_updated = '$date', d_time_updated = '$time' WHERE n_blog_post_id = '$blogId'";
-//     }
-//     // ///here need to run sql query for 'blog_tags' table.
-
-//     //////try and chaeck run the query update blog_post table.
-//     if (mysqli_query($conn, $sqlUpdateBlog) && mysqli_query($conn, $sqlUpdateBlogTags)) {
-//         formSuccess();
-//     } else {
-//         formError("sqlerror");
-//     }
-
-// } else {
-//     // Redirect to the index.php - btn has not preesed
-//     // echo "<script>window.location.href = '../index.php';</script>";
-//     header("Location: ../index.php");
-// }
-// // function dealing with messege to the user.
-// // ///success-msg
-// function formSuccess()
-// {
-
-//     require "dbh.php";
-//     mysqli_close($conn); ////close database connection.
-//     // ////after success update the data in the blog_post table - cancel the session.
-//     unset($_SESSION['editBlogId']);
-//     unset($_SESSION['editTitle']);
-//     unset($_SESSION['editMetaTitle']);
-//     unset($_SESSION['editCategoryId']);
-//     unset($_SESSION['editSummary']);
-//     unset($_SESSION['editContent']);
-//     unset($_SESSION['editPath']);
-//     unset($_SESSION['editTags']);
-//     unset($_SESSION['editHomePagePlacement']);
-//     ///////redirrect with success msg.
-//     header("Location: ../blogs.php?updateblog=success");
-//     exit();
-// }
-// // ///error-msg
-// function formError($errorCode)
-// {
-
-//     require "dbh.php";
-//     // ////save in session last changes.
-//     $_SESSION['editTitle'] = $_POST['blog-title'];
-//     $_SESSION['editMetaTitle'] = $_POST['blog-meta-title'];
-//     $_SESSION['editCategoryId'] = $_POST['blog-category'];
-//     $_SESSION['editSummary'] = $_POST['blog-summary'];
-//     $_SESSION['editContent'] = $_POST['blog-content'];
-//     $_SESSION['editTags'] = $_POST['blog-tags'];
-//     $_SESSION['editPath'] = $_POST['blog-path'];
-//     $_SESSION['editHomePagePlacement'] = $_POST['blog-home-page-placement'];
-
-//     mysqli_close($conn); ////close he database
-//     // //redirect - with error msg.
-//     header("Location: ../edit-blog.php?updateblog=" . $errorCode);
-//     exit();
-// }
 
 
-
-
-
-
-
-// // function that will be respansible about update and upload images.
-// function uploadImage($img, $imgName, $imgType, $imgDbColumn)
-// {
-
-//     require "dbh.php";
-
-//     $imgUrl = "";
-
-//     $validExt = array("jpg", "png", "jpeg", "bmp", "gif");
-
-//     if ($img == "") {
-//         // ///nothing chaged
-//         return "noupdate";
-//     } else {
-
-//         if ($_FILES[$imgName]["size"] <= 0) {
-//             formError($imgType . "imageerror");
-//         } else {
-
-//             $ext = strtolower(end(explode(".", $img)));
-//             if (!in_array($ext, $validExt)) {
-//                 formError("invalidtype" . $imgType . "image");
-//             }
-
-//             // delete old image
-//             $blogId = $_POST['blog-id']; ///get the id og the blog_post data.
-//             /////sql query for the old img that in the database
-//             $sqlGetOldImage = "SELECT " . $imgDbColumn . " FROM blog_post WHERE n_blog_post_id = '$blogId'";
-//             $queryGetOldImage = mysqli_query($conn, $sqlGetOldImage);
-
-//             if ($rowGetOldImage = mysqli_fetch_assoc($queryGetOldImage)) {
-//                 $oldImgURL = $rowGetOldImage[$imgDbColumn];
-//             }
-
-//             if (!empty($oldImgURL)) {
-//                 $oldImgURLArray = explode("/", $oldImgURL);
-//                 $oldImgName = end($oldImgURLArray);
-//                 // ///diffine the path dir
-//                 $oldImgPath = "../images/blog-images/" . $oldImgName;
-//                 unlink($oldImgPath); ////delete the old file.
-//             }
-//             ////diffine the folder
-//             $folder = "../images/blog-images/";
-//             // /////choose random number fole new name img
-//             $imgNewName = rand(10000, 990000) . '_' . time() . '.' . $ext;
-//             $imgPath = $folder . $imgNewName;
-//             //////check for the upload img file to the folder.
-//             if (move_uploaded_file($_FILES[$imgName]['tmp_name'], $imgPath)) {
-//                 $imgUrl = "http://localhost/blog/admin/images/blog-images/" . $imgNewName;
-//             } else {
-//                 formError("erroruploading" . $imgType . "image");
-//             }
-//         }
-
-//         return $imgUrl;
-//     }
-// }

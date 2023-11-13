@@ -9,6 +9,11 @@ unset($_SESSION['blogSummary']);
 unset($_SESSION['blogContent']);
 unset($_SESSION['blogTags']);
 unset($_SESSION['blogPath']);
+unset($_SESSION['blogPath']);
+
+unset($_SESSION['blogAuthorName']); ///un-set-author-name from the session
+
+
 unset($_SESSION['blogHomePagePlacement']);
 
 /////cancel session of the edit-blog-post inputs
@@ -20,4 +25,6 @@ unset($_SESSION['editSummary']);
 unset($_SESSION['editContent']);
 unset($_SESSION['editPath']);
 unset($_SESSION['editTags']);
+unset($_SESSION['editAuthorName']); ////un-set edit-authorName
+
 unset($_SESSION['editHomePagePlacement']);

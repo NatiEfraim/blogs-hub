@@ -168,7 +168,14 @@ try {
                                                                                                                 echo $_SESSION['blogMetaTitle'];
                                                                                                             } ?>">
                                             </div>
-
+                                            <!--my adding - author name  -->
+                                            <div class="form-group">
+                                                <label>Author Name</label>
+                                                <input class="form-control" name="blog-author-name" value="<?php if (isset($_SESSION['blogAuthorName'])) {
+                                                                                                                echo $_SESSION['blogAuthorName'];
+                                                                                                            } ?>">
+                                            </div>
+                                            <!-- and my adding -->
                                             <!-- select category -->
                                             <div class="form-group">
                                                 <label>Selects Blog category</label>
@@ -196,6 +203,15 @@ try {
                                                 <label>Alternate Image</label>
                                                 <input type="file" name="alt-blog-image" id="alt-blog-image">
                                             </div>
+
+                                            <!-- my adding - need to delete -->
+                                            <!-- Alternte image -->
+                                            <div class="form-group">
+                                                <label>Author Image</label>
+                                                <input type="file" name="author-blog-image" id="author-blog-image">
+                                            </div>
+                                            <!-- end my adding - need to delete -->
+
                                             <!-- imputs summary text -->
                                             <div class="form-group">
                                                 <label>Summery</label>
@@ -320,17 +336,22 @@ try {
             // get the value for main and alt image
             var main_img = $("#main-blog-image").val();
             var alt_img = $("#alt-blog-image").val();
+            var author_img = $("#author-blog-image").val();
             // ///diffine for alow ext
             var exts = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
 
             var get_ext_main_img = main_img.split('.');
             var get_ext_alt_img = alt_img.split('.');
+            var get_ext_author_img = author_img.split('.');
 
             get_ext_main_img = get_ext_main_img.reverse();
             get_ext_alt_img = get_ext_alt_img.reverse();
+            get_ext_author_img = get_ext_author_img.reverse();
 
             main_image_check = false;
             alt_image_check = false;
+            author_image_check = false;
+
             // /////chaeck the main image
             if (main_img.length > 0) {
                 if ($.inArray(get_ext_main_img[0].toLowerCase(), exts) >= -1) {
@@ -347,7 +368,7 @@ try {
             }
             // ////check alt image
             if (alt_img.length > 0) {
-                if ($.inArray(get_ext_alt_img[0].toLowerCase(), exts) >= -1) {
+                if ($.inArray(get_ext_author_img[0].toLowerCase(), exts) >= -1) {
                     alt_image_check = true;
                 } else {
                     alert("Error -> Alternate Image. Upload only jpg, jpeg, png, gif, bmp images.");
@@ -358,10 +379,24 @@ try {
                 alert("Please upload a alternate image.");
                 alt_image_check = false;
             }
+            // ////check author image
+            if (author_img.length > 0) {
+                if ($.inArray(get_ext_alt_img[0].toLowerCase(), exts) >= -1) {
+                    author_image_check = true;
+                } else {
+                    alert("Error -> Author Image. Upload only jpg, jpeg, png, gif, bmp images.");
+                    author_image_check = false;
+                }
+            } else {
+                // //////alt image not upload
+                alert("Please upload a author image.");
+                author_image_check = false;
+            }
             // ////return boll function
-            if (main_image_check == true && alt_image_check == true) {
+            if (main_image_check == true && alt_image_check == true && author_image_check == true) {
                 return true;
             } else {
+                // ///one of the 3 img faild.
                 return false;
             }
 
