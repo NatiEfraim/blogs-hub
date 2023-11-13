@@ -293,6 +293,7 @@ if (isset($_REQUEST['blog'])) {
                                 <li class="thread-alt depth-1 comment">
                                     <div class="comment__content">
                                         <div class="comment__info">
+                                            <!-- get the comment-auther-id for to replay -->
                                             <input type="hidden" id="comment-author-<?php echo $commentId; ?>" value="<?php echo $commentAuthor; ?>">
                                             <div class="comment__author"><?php echo $commentAuthor; ?></div>
                                             <div class="comment__meta">
@@ -345,8 +346,56 @@ if (isset($_REQUEST['blog'])) {
                 </div> <!-- end col-full -->
             </div> <!-- end comments -->
 
+            <!-- form of add replay comment -->
+
+            <!-- add-repaly-comment -->
+            <div class="row comment-respond" id="reply-comment-section">
+
+                <!-- START respond -->
+                <div id="respond" class="column">
+
+                    <h3 id="reply-h3"></h3>
+                    <!-- msg for user affter addnig replay -->
+                    <p style="color:green;display:none;" id="reply-success">Your reply was added successfully. Refresh your page to view it.</p>
+                    <p style="color:red;display:none;" id="reply-error"></p>
+
+                    <form name="replyForm" id="replyForm">
+                        <fieldset>
+                            <!-- grab the blog_post_id -->
+                            <input type="hidden" name="replyBlogPostId" id="replyBlogPostId" value="<?php echo $blogPostId; ?>">
+                            <!-- get the parent id of the replay. -->
+                            <input type="hidden" name="commentParentId" id="commentParentId" value="">
+                            <!-- name of author replay -->
+                            <div class="form-field">
+                                <input name="replyCName" id="replyCName" class="h-full-width h-remove-bottom" placeholder="Your Name" value="" type="text">
+                            </div>
+                            <!-- email of replay author -->
+                            <div class="form-field">
+                                <input name="replyCEmail" id="replyCEmail" class="h-full-width h-remove-bottom" placeholder="Your Email" value="" type="text">
+                            </div>
+                            <!-- replay content -->
+                            <div class="message form-field">
+                                <textarea name="replyCMessage" id="replyCMessage" class="h-full-width" placeholder="Your Message"></textarea>
+                            </div>
+
+                            <br>
+                            <!-- add replay comment -->
+                            <input name="submit" id="submitReplyForm" class="btn btn--primary btn-wide btn--large h-full-width" value="Reply" type="submit">
+                            <!-- if you want to add a comment insted a replay -->
+                            <input name="submit" id="addComment" class="btn btn--primary btn-wide btn--large h-full-width" value="Add Comment" onclick="prepareComment();">
+                        </fieldset>
+                    </form> <!-- end form -->
+
+                </div>
+                <!-- END respond-->
+
+            </div> <!-- end comment-respond -->
+
+
+            <!-- form of add comment -->
+
             <!-- add-comment form -->
-            <div class="row comment-respond">
+            <div class="row comment-respond" id="add-comment-section">
 
                 <!-- START respond -->
                 <div id="respond" class="column">
@@ -362,7 +411,7 @@ if (isset($_REQUEST['blog'])) {
                     <form name="commentForm" id="commentForm">
                         <fieldset>
                             <!-- get the blog-post-id by hidden input -->
-                            <input type="hidden" name="replyBlogPostId" id="replyBlogPostId" value="<?php echo $blogPostId; ?>">
+                            <input type="hidden" name="blogPostId" id="blogPostId" value="<?php echo $blogPostId; ?>">
                             <!-- fill your name -->
                             <div class="form-field">
                                 <input name="cName" id="cName" class="h-full-width h-remove-bottom" placeholder="Your Name" value="" type="text">
@@ -372,9 +421,7 @@ if (isset($_REQUEST['blog'])) {
                                 <input name="cEmail" id="cEmail" class="h-full-width h-remove-bottom" placeholder="Your Email" value="" type="text">
                             </div>
 
-                            <!-- <div class="form-field">
-                                <input name="cWebsite" id="cWebsite" class="h-full-width h-remove-bottom" placeholder="Website" value="" type="text">
-                            </div> -->
+
 
                             <div class="message form-field">
                                 <textarea name="cMessage" id="cMessage" class="h-full-width" placeholder="Your Message"></textarea>
@@ -426,6 +473,17 @@ if (isset($_REQUEST['blog'])) {
                 return true;
             }
         }
+        // ///function of hide add-commnet and show replay-comment
+        function prepareReply(commentId) {
+            $("#comment-success").css("display", "none");
+            $("#comment-error").css("display", "none");
+            $("#reply-comment-section").show();
+            $("#add-comment-section").hide();
+            // get inputs field and set the html
+            var authorName = $("#comment-author-" + commentId).val();
+            $("#reply-h3").html("Reply to: " + authorName);
+            $("#commentParentId").val(commentId);
+        }
         // ///function of show add-commnet and hide replay-comment
         function prepareComment() {
             $("#comment-success").css("display", "none");
@@ -466,7 +524,7 @@ if (isset($_REQUEST['blog'])) {
                 var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
                 /////diffine the date
                 var dateFormatted = months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
-
+                // ////diffine in js where send the request
                 $.ajax({
                     method: "POST",
                     url: "includes/add-comment.php",
@@ -480,6 +538,62 @@ if (isset($_REQUEST['blog'])) {
                         } else {
                             $("#comment-error").css("display", "block");
                             $("#comment-error").html("There was an error while adding your comment. Please try again later.");
+                        }
+                    }
+                });
+            }
+        });
+
+        // ////function of deal with the replay on comment form
+
+        $(document).on('submit', '#replyForm', function(e) {
+            // //prevent default the form
+            e.preventDefault();
+            //////set msg user 
+            $("#reply-success").css("display", "none");
+            $("#reply-error").css("display", "none");
+            ////get all value we need
+            var name = $("#replyCName").val();
+            var email = $("#replyCEmail").val();
+            var reply = $("#replyCMessage").val();
+            var parentId = $("#commentParentId").val();
+            // ///handle with any error popup in
+            if (!name || !email || !reply) {
+                $("#reply-error").css("display", "block");
+                $("#reply-error").html("Please fill all fields.");
+            } else if (name.length > 50) {
+                $("#reply-error").css("display", "block");
+                $("#reply-error").html("The name input field can only be a max of 50 characters.");
+            } else if (email.length > 50) {
+                $("#reply-error").css("display", "block");
+                $("#reply-error").html("The email input field can only be a max of 50 characters.");
+            } else if (reply.length > 500) {
+                $("#reply-error").css("display", "block");
+                $("#reply-error").html("The message input field can only be a max of 500 characters.");
+            } else if (checkEmail(email) == false) {
+                $("#reply-error").css("display", "block");
+                $("#reply-error").html("Please enter a valid email address.");
+            } else if (!parentId) {
+                $("#reply-error").css("display", "block");
+                $("#reply-error").html("There was an unexpected error. Try refreshing the page.");
+            } else {
+                ///add the replay on the comment
+                var date = new Date();
+                var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+                // ////set the date and time
+                var dateFormatted = months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
+                ////dififne the url to sent the requset 
+                $.ajax({
+                    method: "POST",
+                    url: "includes/add-reply.php",
+                    data: $(this).serialize(),
+                    success: function(data) {
+                        if (data == "success") {
+                            $("#reply-success").css("display", "block");
+                            $("#replyForm").hide();
+                        } else {
+                            $("#reply-error").css("display", "block");
+                            $("#reply-error").html("There was an error while adding your reply. Please try again later.");
                         }
                     }
                 });

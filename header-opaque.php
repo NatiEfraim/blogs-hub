@@ -76,11 +76,12 @@ try {
 
         <div class="s-header__search-inner">
             <div class="row wide">
+                <!-- search-form -->
 
-                <form role="search" method="get" class="s-header__search-form" action="#">
+                <form role="search" method="get" class="s-header__search-form" action="./search.php">
                     <label>
                         <span class="h-screen-reader-text">Search for:</span>
-                        <input type="search" class="s-header__search-field" placeholder="Search for..." value="" name="s" title="Search for:" autocomplete="off">
+                        <input type="search" class="s-header__search-field" placeholder="Search for..." value="" name="query" title="Search for:" autocomplete="off">
                     </label>
                     <input type="submit" class="s-header__search-submit" value="Search">
                 </form>
