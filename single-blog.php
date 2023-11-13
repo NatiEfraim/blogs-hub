@@ -1,6 +1,47 @@
 <?php
 require './admin/includes/db-pdo.php';
-
+require './admin/includes/dbh.php';
+// ///check the url if has blog-path
+if (isset($_REQUEST['blog'])) {
+    ///grab the blogPath
+    $blogPath = $_REQUEST['blog'];
+    /////diffine the sql query
+    $sqlGetBlog = "SELECT * FROM blog_post WHERE v_post_path = '$blogPath' AND f_post_status = '1'";
+    $queryGetBlog = mysqli_query($conn, $sqlGetBlog);
+    /////try run the query - and get the data
+    if ($rowGetBlog = mysqli_fetch_assoc($queryGetBlog)) {
+        ///////////grab all data from the 'blog_post' table.
+        $blogPostId = $rowGetBlog['n_blog_post_id'];
+        $blogCategoryId = $rowGetBlog['n_category_id'];
+        $blogTitle = $rowGetBlog['v_post_title'];
+        $blogMetaTitle = $rowGetBlog['v_post_meta_title'];
+        $blogContent = $rowGetBlog['v_post_content'];
+        $blogMainImgUrl = $rowGetBlog['v_main_image_url'];
+        $blogCreationDate = $rowGetBlog['d_date_created'];
+    } else {
+        /////there is nothing to show up - redirect index.php
+        header("Location: ./index.php");
+        exit();
+    }
+    // ////diffine the sql query to get all data from the 'blog_category' table
+    $sqlGetCategory = "SELECT * FROM blog_category WHERE n_category_id = '$blogCategoryId'";
+    $queryGetCategory = mysqli_query($conn, $sqlGetCategory);
+    //////try run the query
+    if ($rowGetCategory = mysqli_fetch_assoc($queryGetCategory)) {
+        /////save all date we need from the 'blog_category' table
+        $categoryTitle = $rowGetCategory['v_category_title'];
+        $blogCategoryPath = $rowGetCategory['v_category_path'];
+    }
+    /////siffine the sql query for get all data from 'blog_tags' table
+    $sqlGetTags = "SELECT * FROM blog_tags WHERE n_blog_post_id = '$blogPostId'";
+    $queryGetTags = mysqli_query($conn, $sqlGetTags);
+    ////try run the query
+    if ($rowGetTags = mysqli_fetch_assoc($queryGetTags)) {
+        /////save all data we need from the 'blog_tags' table.
+        $blogTags = $rowGetTags['v_tag'];
+        $blogTagsArr = explode(",", $blogTags);
+    }
+}
 
 ?>
 
@@ -14,7 +55,7 @@ require './admin/includes/db-pdo.php';
     <!--- basic page needs
     ================================================== -->
     <meta charset="utf-8">
-    <title>Standard Post - Calvin</title>
+    <title>Blogs-Hub | <?php echo $blogMetaTitle; ?></title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -68,127 +109,24 @@ require './admin/includes/db-pdo.php';
 
                     <div class="s-content__media">
                         <div class="s-content__post-thumb">
-                            <img src="images/thumbs/single/single-post-1050.jpg" srcset="images/thumbs/single/single-post-2100.jpg 2100w, 
-                                         images/thumbs/single/single-post-1050.jpg 1050w, 
-                                         images/thumbs/single/single-post-525.jpg 525w" sizes="(max-width: 2100px) 100vw, 2100px" alt="">
+                            <img src="<?php echo $blogMainImgUrl; ?>" srcset="<?php echo $blogMainImgUrl; ?> 2100w, 
+                            <?php echo $blogMainImgUrl; ?> 1050w, 
+                            <?php echo $blogMainImgUrl; ?> 525w" sizes="(max-width: 2100px) 100vw, 2100px" alt="">
                         </div>
                     </div> <!-- end s-content__media -->
 
                     <div class="s-content__entry-header">
-                        <h1 class="s-content__title s-content__title--post">Hey, This Is A Standard Format Post.</h1>
+                        <h1 class="s-content__title s-content__title--post"><?php echo $blogTitle; ?></h1>
                     </div> <!-- end s-content__entry-header -->
 
                     <div class="s-content__primary">
 
                         <div class="s-content__entry-content">
 
-                            <p class="lead">
-                                Duis ex ad cupidatat tempor Excepteur cillum cupidatat fugiat nostrud cupidatat dolor
-                                sunt sint sit nisi est eu exercitation incididunt adipisicing veniam velit id fugiat
-                                enim mollit amet anim veniam dolor dolor irure velit commodo cillum sit nulla ullamco
-                                magna amet magna cupidatat qui labore cillum sit in tempor veniam consequat non laborum
-                                adipisicing aliqua ea nisi sint. Unde quod at minus quia velit ipsa ea qui. </p>
+                            <!-- blog-content -->
+                            <?php echo $blogContent; ?>
 
-                            <p>
-                                Duis ex ad cupidatat tempor Excepteur cillum cupidatat fugiat nostrud cupidatat dolor
-                                sunt sint sit nisi est eu exercitation incididunt adipisicing veniam velit id fugiat
-                                enim mollit amet anim veniam dolor dolor irure velit commodo cillum sit nulla ullamco
-                                magna amet magna cupidatat qui labore cillum sit in tempor veniam consequat non laborum
-                                adipisicing aliqua ea nisi sint ut quis proident ullamco ut dolore culpa occaecat ut
-                                laboris in sit minim cupidatat ut dolor voluptate enim veniam consequat occaecat fugiat
-                                in adipisicing in amet Ut nulla nisi non ut enim aliqua laborum mollit quis nostrud sed sed.
-                            </p>
 
-                            <p>
-                                <img src="images/sample-1050.jpg" srcset="images/sample-2100.jpg 2100w, 
-                                                images/sample-1050.jpg 1050w, 
-                                                images/sample-525.jpg 525w" sizes="(max-width: 2100px) 100vw, 2100px" alt="">
-                            </p>
-
-                            <p>
-                                Duis ex ad cupidatat tempor Excepteur cillum cupidatat fugiat nostrud cupidatat dolor
-                                sunt sint sit nisi est eu exercitation incididunt adipisicing veniam velit id fugiat
-                                enim mollit amet anim veniam dolor dolor irure velit commodo cillum sit nulla ullamco
-                                magna amet magna cupidatat qui labore cillum sit in tempor veniam consequat non laborum
-                                adipisicing aliqua ea nisi sint ut quis proident ullamco ut dolore culpa occaecat ut
-                                laboris in sit minim cupidatat ut dolor voluptate enim veniam consequat occaecat fugiat
-                                in adipisicing in amet Ut nulla nisi non ut enim aliqua laborum mollit quis nostrud sed sed.
-                            </p>
-
-                            <h2>Large Heading</h2>
-
-                            <p>
-                                Harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta
-                                nobis est eligendi optio cumque nihil impedit quo minus <a href="http://#">omnis voluptas assumenda est</a>
-                                id quod maxime placeat facere possimus, omnis dolor repellendus. Temporibus autem quibusdam et
-                                aut officiis debitis aut rerum necessitatibus saepe eveniet ut et.</p>
-
-                            <blockquote>
-                                <p>
-                                    For God so loved the world, that he gave his only Son, that whoever believes in
-                                    him should not perish but have eternal life. For God did not send his Son into
-                                    the world to condemn the world, but in order that the world might be
-                                    saved through him.
-                                </p>
-                                <cite>John 3:16-17 ESV</cite>
-                            </blockquote>
-
-                            <p>
-                                Odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti dolores
-                                et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa.
-                                Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nulla vitae elit
-                                libero, a pharetra augue laboris in sit minim cupidatat ut dolor voluptate enim veniam consequat
-                                occaecat fugiat in adipisicing in amet Ut nulla nisi non ut enim aliqua laborum mollit quis nostrud sed sed..</p>
-
-                            <h3>Smaller Heading</h3>
-
-                            <p>
-                                Quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est
-                                eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas
-                                assumenda est, omnis dolor repellendus.
-                            </p>
-
-                            <p>
-                                Quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est
-                                eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas
-                                assumenda est, omnis dolor repellendus.
-                            </p>
-
-                            <pre><code class="language-css">
-    code {
-        font-size: 1.4rem;
-        margin: 0 .2rem;
-        padding: .2rem .6rem;
-        white-space: nowrap;
-        background: #F1F1F1;
-        border: 1px solid #E1E1E1;	
-        border-radius: 3px;
-    }
-</code></pre>
-
-                            <p>
-                                Odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti dolores et
-                                quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa.</p>
-
-                            <ul>
-                                <li>Donec nulla non metus auctor fringilla.
-                                    <ul>
-                                        <li>Lorem ipsum dolor sit amet.</li>
-                                        <li>Lorem ipsum dolor sit amet.</li>
-                                        <li>Lorem ipsum dolor sit amet.</li>
-                                    </ul>
-                                </li>
-                                <li>Donec nulla non metus auctor fringilla.</li>
-                                <li>Donec nulla non metus auctor fringilla.</li>
-                            </ul>
-
-                            <p>
-                                Odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa. Aenean eu leo quam.
-                                Pellentesque ornare sem lacinia quam venenatis vestibulum. Nulla vitae elit libero, a pharetra augue
-                                laboris in sit minim cupidatat ut dolor voluptate enim veniam consequat occaecat fugiat in adipisicing
-                                in amet Ut nulla nisi non ut enim aliqua laborum mollit quis nostrud sed sed.
-                            </p>
 
                         </div> <!-- end s-entry__entry-content -->
 
@@ -200,7 +138,7 @@ require './admin/includes/db-pdo.php';
                                 </div>
                                 <div class="byline">
                                     <span class="bytext">Posted By</span>
-                                    <a href="#0">John Doe</a>
+                                    <a href="#">Prth Modi</a>
                                 </div>
                             </div>
 
@@ -209,29 +147,76 @@ require './admin/includes/db-pdo.php';
                                 <div class="entry-cat-links meta-blk">
                                     <div class="cat-links">
                                         <span>In</span>
-                                        <a href="#0">Frontend</a>
-                                        <a href="#0">Design</a>
-                                        <a href="#0">Work</a>
+                                        <a href="./categories.php?group=<?php echo $blogCategoryPath; ?>"><?php echo $categoryTitle; ?></a>
+                                        <!-- <a href="#0">Design</a>
+                                        <a href="#0">Work</a> -->
                                     </div>
-
+                                    <!-- date created. -->
                                     <span>On</span>
-                                    Oct 5, 2020
+                                    <?php echo date("M j, Y", strtotime($blogCreationDate)); ?>
+
                                 </div>
 
                                 <div class="entry-tags meta-blk">
                                     <span class="tagtext">Tags</span>
-                                    <a href="#">orci</a>
+                                    <!-- loop all tags categories -->
+                                    <?php
+
+                                    for ($i = 0; $i < count($blogTagsArr); $i++) {
+                                        if (!empty($blogTagsArr[$i])) {
+                                            echo "<a href='search.php?query=" . $blogTagsArr[$i] . "'>" . $blogTagsArr[$i] . "</a>";
+                                        }
+                                    }
+
+                                    ?>
+                                    <!-- <a href="#">orci</a>
                                     <a href="#">lectus</a>
                                     <a href="#">varius</a>
-                                    <a href="#">turpis</a>
+                                    <a href="#">turpis</a> -->
                                 </div>
 
                             </div>
 
                         </div> <!-- s-content__entry-meta -->
 
+
                         <div class="s-content__pagenav">
-                            <div class="prev-nav">
+                            <!-- get the prev and next blogPost  -->
+                            <?php
+                            //////diffine sql query for the prev blog-post
+                            $sqlGetPreviousBlog = "SELECT * FROM blog_post WHERE n_blog_post_id = (SELECT max(n_blog_post_id) FROM blog_post WHERE n_blog_post_id < '" . $blogPostId . "') AND f_post_status = '1'";
+                            $queryGetPreviousBlog = mysqli_query($conn, $sqlGetPreviousBlog);
+                            ////diffine the sql qeury for the next query
+                            $sqlGetNextBlog = "SELECT * FROM blog_post WHERE n_blog_post_id = (SELECT min(n_blog_post_id) FROM blog_post WHERE n_blog_post_id > '" . $blogPostId . "') AND f_post_status = '1'";
+                            $queryGetNextBlog = mysqli_query($conn, $sqlGetNextBlog);
+                            ////run the 2 query and print them 
+                            if ($rowGetPreviousBlog = mysqli_fetch_assoc($queryGetPreviousBlog)) {
+                                $previousBlogName = $rowGetPreviousBlog['v_post_title'];
+                                $previousBlogPath = $rowGetPreviousBlog['v_post_path'];
+
+                                echo "<div class='prev-nav'>
+                                        <a href='single-blog.php?blog=" . $previousBlogPath . "' rel='prev'>
+                                            <span>Previous</span>
+                                            " . $previousBlogName . "
+                                        </a>
+                                    </div>";
+                            }
+
+                            if ($rowGetNextBlog = mysqli_fetch_assoc($queryGetNextBlog)) {
+                                $nextBlogName = $rowGetNextBlog['v_post_title'];
+                                $nextBlogPath = $rowGetNextBlog['v_post_path'];
+
+                                echo "<div class='prev-nav'>
+                                        <a href='single-blog.php?blog=" . $nextBlogPath . "' rel='prev'>
+                                            <span>Next</span>
+                                            " . $nextBlogName . "
+                                        </a>
+                                    </div>";
+                            }
+
+                            ?>
+
+                            <!-- <div class="prev-nav">
                                 <a href="#" rel="prev">
                                     <span>Previous</span>
                                     Tips on Minimalist Design
@@ -242,8 +227,9 @@ require './admin/includes/db-pdo.php';
                                     <span>Next</span>
                                     A Practical Guide to a Minimalist Lifestyle.
                                 </a>
-                            </div>
-                        </div> <!-- end s-content__pagenav -->
+                            </div> -->
+                        </div>
+                        <!-- end s-content__pagenav -->
 
                     </div> <!-- end s-content__primary -->
                 </article> <!-- end entry -->
