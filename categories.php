@@ -117,6 +117,7 @@ if (isset($_REQUEST['group'])) {
                             $blogPath = $rowGetAllBlogs['v_post_path'];
                             $blogSummary = $rowGetAllBlogs['v_post_summary'];
                             $blogAltImageUrl = $rowGetAllBlogs['v_alt_image_url'];
+                            $blogAuthorName = $rowGetAllBlogs['v_author_name'];
 
                         ?>
 
@@ -135,7 +136,7 @@ if (isset($_REQUEST['group'])) {
                                         <div class="entry__meta">
                                             <span class="byline">By:
                                                 <span class='author'>
-                                                    <a href=" #">Parth Modi</a>
+                                                    <a href="#"><?php echo $blogAuthorName; ?></a>
                                                 </span>
                                             </span>
                                         </div>
