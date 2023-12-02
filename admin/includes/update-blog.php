@@ -186,7 +186,7 @@ function uploadImage($img, $imgName, $imgType, $imgDbColumn)
             $imgPath = $folder . $imgNewName;
             ////try upload and set the imgURL
             if (move_uploaded_file($_FILES[$imgName]['tmp_name'], $imgPath)) {
-                $imgUrl = "http://localhost/blog/admin/images/blog-images/" . $imgNewName;
+                $imgUrl = "http://localhost/dashboard/blogs-hub/admin/images/blog-images/" . $imgNewName;
             } else {
                 formError("erroruploading" . $imgType . "image");
             }
@@ -195,8 +195,3 @@ function uploadImage($img, $imgName, $imgType, $imgDbColumn)
         return $imgUrl;
     }
 }
-?>
-
-
-
-
